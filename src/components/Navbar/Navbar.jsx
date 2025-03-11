@@ -57,7 +57,7 @@ function ResponsiveAppBar() {
               {pages.map((page) => (
                 <MenuItem key={page} onClick={handleCloseNavMenu}>
                   <Link
-                    to={page === 'Home' ? '/eventadder/' : `/eventadder/${page.toLowerCase()}`}
+                    to={page === 'Home' ? '/eventadder' : `/eventadder/${page.toLowerCase()}`}
                     style={{ textDecoration: 'none', width: '100%', textAlign: 'center' }}
                   >
                     <Typography textAlign="center">{page}</Typography>
