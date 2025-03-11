@@ -73,7 +73,7 @@ function ResponsiveAppBar() {
               <Button
                 key={page}
                 component={Link}
-                to={page === 'Home' ? '/' : `/eventadder/${page.toLowerCase()}`}
+                to={page === 'Home' ? '/eventadder/' : `/eventadder/${page.toLowerCase()}`}
                 sx={{ color: 'black', fontWeight: 'bold', textTransform: 'none' }}
               >
                 {page}
