@@ -1,173 +1,87 @@
 import React, { useState } from "react";
 import axios from "axios";
-import './Form.css'
-import { styled } from '@mui/material/styles';
-import Button from '@mui/material/Button';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import './Form.css';  
+import Button from "@mui/material/Button";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 
-const VisuallyHiddenInput = styled('input')({
-  clip: 'rect(0 0 0 0)',
-  clipPath: 'inset(50%)',
-  height: 1,
-  overflow: 'hidden',
-  position: 'absolute',
-  bottom: 0,
-  left: 0,
-  whiteSpace: 'nowrap',
-  width: 1,
-});
 const Form = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [registerNumber,setRegisterNumber] = useState("");
-  const [eventName,setEventName] = useState ("");
-  const [Department,setDepartment] =useState("");
-  const [file, setFile] = useState(null);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    registerNumber: "",
+    eventName: "",
+    department: "",
+  });
+  const [csvFile, setCsvFile] = useState(null);
 
- 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCsvChange = (e) => {
+    setCsvFile(e.target.files[0]);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    try {
+        const response = await axios.post("http://localhost:7000/api/participants", formData, {
+            headers: { "Content-Type": "application/json" }
+        });
 
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("email", email);
-    formData.append("registernumber",registerNumber);
-    formData.append("eventname",eventName);
-    formData.append("department",Department);
-    if (file) {
-      formData.append("file", file);
+        alert("Participant registered successfully!");
+        setFormData({ name: "", email: "", registerNumber: "", eventName: "", department: "" });
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        alert("Failed to register participant.");
+    }
+};
+
+
+  const handleCsvUpload = async () => {
+    if (!csvFile) {
+      alert("Please select a CSV or Excel file first.");
+      return;
     }
 
+    const data = new FormData();
+    data.append("csvFile", csvFile);
+
     try {
-      await axios.post("http://localhost:5000/api/participants", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      await axios.post("http://localhost:7000/api/uploadCSV", data, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      alert("Participant registered successfully!");
-      setName("");
-      setEmail("");
-      setRegisterNumber("");
-      setEventName("");
-      setDepartment("");
-      set
-      setFile(null);
+      alert("CSV uploaded successfully!");
+      setCsvFile(null);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      alert("Failed to register participant.");
-    } 
+      console.error("Error uploading CSV:", error);
+      alert("Failed to upload CSV.");
+    }
   };
 
   return (
     <div className="container">
-      <form
-        onSubmit={handleSubmit}
-        className="form-container"
-      >
-        <h1 className="title">
-          Event Registration
-        </h1>
-
+      <form onSubmit={handleSubmit} className="form-container">
+        <h1 className="title">Event Registration</h1>
+        <input className="input" type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Name" required />
+        <input className="input" type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email" required />
+        <input className="input" type="text" name="registerNumber" value={formData.registerNumber} onChange={handleChange} placeholder="Register Number" required />
+        <input className="input" type="text" name="eventName" value={formData.eventName} onChange={handleChange} placeholder="Event Name" required />
+        <input className="input" type="text" name="department" value={formData.department} onChange={handleChange} placeholder="Department" required />
        
-        <div className="formcontent">
-         
-          <div>
-            <label className="labelcontent">
-              Participant Name *
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="input"
-              required
-            />
-          </div>
+        <label className="upload-btn">
+          <CloudUploadIcon />
+          Upload CSV
+          <input type="file" accept=".csv, .xlsx" onChange={handleCsvChange} className="hidden-input" />
+        </label>
+        <div className="bt">
+        <button type="button" className="btn" onClick={handleCsvUpload}>
+          Upload CSV
+        </button>
 
-          
-          <div>
-            <label className="labelcontent">
-              E-mail *
-            </label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input"
-              required
-            />
-          </div>
-        
-        <div>
-          <label className="labelcontent">
-            Register Number*
-            </label>
-            <input
-              type="number"
-              placeholder="Enter your Phone Number"
-              value={registerNumber}
-              onChange={(e) => setPhone(e.target.value)}
-              className="input"
-              required
-            />
-          </div>
-
-          <div>
-          <label className="labelcontent">
-             Event Name*
-            </label>
-            <input
-              type="text"
-              placeholder="Enter Event you are participating"
-              value={eventName}
-              onChange={(e) => setEventName(e.target.value)}
-              className="input"
-              required
-            />
-          </div>
-
-          <div>
-          <label className="labelcontent">
-             Department Name*
-            </label>
-            <input
-              type="text"
-              placeholder="Enter your Department Name"
-              value={Department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="input"
-              required
-            />
-          </div>
-
-          
-          <Button
-      component="label"
-      role={undefined}
-      variant="contained"
-      tabIndex={-1}
-      startIcon={<CloudUploadIcon />}
-    >
-      Upload files
-      <VisuallyHiddenInput
-        type="file"
-        onChange={(event) => console.log(event.target.files)}
-        multiple
-      />
-    </Button>
-
-          
-          <button
-            type="submit"
-            className="button"
-            
-          >
-          Submit
-          </button>
+        <button type="submit" className="btn">Submit</button>
         </div>
       </form>
     </div>
